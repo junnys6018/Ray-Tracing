@@ -1,3 +1,5 @@
+#include <random>
+
 #include "Geometry.h"
 
 // Ray
@@ -22,10 +24,17 @@ glm::vec3 Ray::parameterize(float t) const
 	return m_pos + t * m_dir;
 }
 
+/// Hitables
+
+Hitable::Hitable(std::shared_ptr<Material> mat)
+	:m_material(mat)
+{
+}
+
 // Sphere
 
-Sphere::Sphere(glm::vec3 center, float radius)
-	:m_center(center), m_radius(radius)
+Sphere::Sphere(glm::vec3 center, float radius, std::shared_ptr<Material> mat)
+	:Hitable(mat), m_center(center), m_radius(radius)
 {
 }
 
@@ -41,6 +50,8 @@ inline float Sphere::getRadius() const
 
 bool Sphere::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
 {
+	rec.material = m_material;
+
 	glm::vec3 pc = r.pos() - m_center;
 	float a = glm::dot(r.dir(), r.dir());
 	float b = 2.0f * glm::dot(r.dir(), pc);
@@ -72,7 +83,7 @@ bool Sphere::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
 // List
 
 HitableList::HitableList(std::vector<std::shared_ptr<Hitable>> list)
-	:m_list(list)
+	:Hitable(nullptr), m_list(list)
 {
 }
 
@@ -94,3 +105,19 @@ bool HitableList::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) co
 
 	return hit;
 }
+
+// Sampling
+
+glm::vec3 randomInUnitSphere()
+{
+	static std::default_random_engine e;
+	static std::uniform_real_distribution<float> u(-1.0f, 1.0f);
+
+	glm::vec3 p;
+	do
+	{
+		p = glm::vec3(u(e), u(e), u(e));
+	} while (glm::dot(p, p) >= 1.0f);
+	return p;
+}
+

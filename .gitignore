@@ -5,3 +5,4 @@ bin-int
 **/*vcxproj.filters
 **/*vcxproj.user
 **/*.sln
+*.png
