@@ -5,7 +5,7 @@
 class Camera
 {
 public:
-	Camera();
+	Camera(glm::vec3 lookFrom, glm::vec3 lookAt, glm::vec3 up, float vfov, float aspect); // vfov is top to bottom in radians
 	Ray getRay(float u, float v) const;
 private:
 	glm::vec3 m_origin;

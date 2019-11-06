@@ -34,7 +34,7 @@ glm::vec3 color(const Ray& r, Hitable* world, int depth = 0)
 
 int main()
 {
-	const int nx = 1080, ny = nx / 2, ns = 500;
+	const int nx = 1080, ny = 720, ns = 20;
 	ImageData image(nx, ny);
 
 	std::vector<std::shared_ptr<Hitable>> list;
@@ -49,7 +49,7 @@ int main()
 
 	HitableList world(list);
 
-	Camera cam;
+	Camera cam(glm::vec3(-2, 2, 1), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), glm::radians(60.0f), (float)nx / ny);
 	std::default_random_engine e;
 	std::uniform_real_distribution<float> uRand(0.0f, 0.999999999f);
 
