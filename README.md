@@ -4,11 +4,11 @@ Code written while learning ray tracing
 - DOF (customisable apature and focus plane) 
 - Motion blur
 - Reflection and refraction
+- BVH's
 ## Todo
 - Multithreading
 - GPU parallelisation
 - Textures
-- BVH's
 - Volumetric rendering
 - Point Lights
 - Area Lights
