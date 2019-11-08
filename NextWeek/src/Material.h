@@ -1,5 +1,6 @@
 #pragma once
 #include "glm.hpp"
+#include "Texture.h"
 #include "Geometry.h"
 
 class Material
@@ -13,7 +14,7 @@ class Lambertian : public Material
 public:
 	Lambertian(glm::vec3 albedo);
 	bool scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const override;
-	glm::vec3 getAlbedo() const;
+	glm::vec3 getAlbedo() const { return m_albedo; }
 
 private:
 	glm::vec3 m_albedo;
@@ -24,10 +25,33 @@ class Metal : public Material
 public:
 	Metal(glm::vec3 fresnel, float roughness);
 	bool scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const override;
-	glm::vec3 getFresnel() const;
+	glm::vec3 getFresnel() const { return m_fresnel; }
 
 private:
 	glm::vec3 m_fresnel;
+	float m_roughness;
+};
+
+class TexLambertian : public Material
+{
+public:
+	TexLambertian(std::shared_ptr<Texture> albedo);
+	bool scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const override;
+	std::shared_ptr<Texture> getAlbedo() const { return m_albedo; }
+
+private:
+	std::shared_ptr<Texture> m_albedo;
+};
+
+class TexMetal : public Material
+{
+public:
+	TexMetal(std::shared_ptr<Texture> fresnel, float roughness);
+	bool scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const override;
+	std::shared_ptr<Texture> getFresnel() const { return m_fresnel; }
+
+private:
+	std::shared_ptr<Texture> m_fresnel;
 	float m_roughness;
 };
 

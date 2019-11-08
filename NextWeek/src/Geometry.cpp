@@ -72,6 +72,7 @@ BVHnode::BVHnode(std::vector<std::shared_ptr<Hitable>> list, float t0, float t1)
 			return false;
 	};
 
+	// Sort hitables according to x, y or z axis and partition the each half in an AABB
 	std::sort(list.begin(), list.end(), compare);
 
 	if (list.size() == 1)

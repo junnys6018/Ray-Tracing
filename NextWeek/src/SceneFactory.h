@@ -16,3 +16,4 @@ std::vector<std::function<Scene(float)>> getSceneFactories();
 
 Scene scene1(float aspect);
 Scene scene2(float aspect);
+Scene scene3(float aspect);

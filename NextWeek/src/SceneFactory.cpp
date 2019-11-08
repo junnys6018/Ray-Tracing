@@ -3,10 +3,11 @@
 #include <random>
 
 #include "Material.h"
+#include "Texture.h"
 
 std::vector<std::function<Scene(float)>> getSceneFactories()
 {
-	return { scene1,scene2 };
+	return { scene1,scene2, scene3 };
 }
 
 Scene scene1(float aspect)
@@ -70,7 +71,24 @@ Scene scene2(float aspect)
 
 	glm::vec3 lookfrom(0.0f, 2.0f, 13.0f);
 	glm::vec3 lookat(0.0f, 0.0f, -1.0f);
-	float apature = 0.2f;
+	float apature = 0.1f;
+	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(50.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
+
+	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam };
+}
+
+Scene scene3(float aspect)
+{
+	std::shared_ptr<CheckerTexture> checker = std::make_shared<CheckerTexture>(std::make_shared<ConstTexture>(glm::vec3(0.2f, 0.3f, 0.1f)),
+		std::make_shared<ConstTexture>(glm::vec3(0.9f, 0.9f, 0.9f)));
+
+	std::vector<std::shared_ptr<Hitable>> list;
+	list.emplace_back(new Sphere(glm::vec3(0.0f, 10.0f, 0.0f), 10.0f, std::make_shared<TexLambertian>(checker)));
+	list.emplace_back(new Sphere(glm::vec3(0.0f, -10.0f, 0.0f), 10.0f, std::make_shared<TexLambertian>(checker)));
+
+	glm::vec3 lookfrom(13.0f, 2.0f, 3.0f);
+	glm::vec3 lookat(0.0f);
+	float apature = 0.0f;
 	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(50.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
 
 	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam };

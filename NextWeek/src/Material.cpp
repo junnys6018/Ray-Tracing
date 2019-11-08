@@ -1,5 +1,4 @@
 #include "Material.h"
-#include "Geometry.h"
 
 #include <random>
 
@@ -14,11 +13,6 @@ bool Lambertian::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& atten
 	scattered = Ray(rec.p, target - rec.p, r_in.time());
 	attenuation = m_albedo;
 	return true;
-}
-
-glm::vec3 Lambertian::getAlbedo() const
-{
-	return m_albedo;
 }
 
 Metal::Metal(glm::vec3 fresnel, float roughness)
@@ -36,9 +30,31 @@ bool Metal::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuatio
 	return glm::dot(scattered.dir(), rec.normal) > 0;
 }
 
-glm::vec3 Metal::getFresnel() const
+TexLambertian::TexLambertian(std::shared_ptr<Texture> albedo)
+	:m_albedo(albedo)
 {
-	return m_fresnel;
+}
+
+bool TexLambertian::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const
+{
+	glm::vec3 target = rec.p + rec.normal + randomInUnitSphere();
+	scattered = Ray(rec.p, target - rec.p, r_in.time());
+	attenuation = m_albedo->value(0.0f, 0.0f, rec.p);
+	return true;
+}
+
+
+TexMetal::TexMetal(std::shared_ptr<Texture> fresnel, float roughness)
+	:m_fresnel(fresnel), m_roughness(roughness)
+{
+}
+
+bool TexMetal::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const
+{
+	glm::vec3 reflected = glm::normalize(glm::reflect(r_in.dir(), rec.normal)) + m_roughness * randomInUnitSphere();
+	scattered = Ray(rec.p, reflected, r_in.time());
+	attenuation = m_fresnel->value(0.0f, 0.0f, rec.p);
+	return glm::dot(scattered.dir(), rec.normal) > 0;
 }
 
 Dielectric::Dielectric(float ri)
