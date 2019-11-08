@@ -16,7 +16,7 @@ glm::vec3 Ray::parameterize(float t) const
 	return m_pos + t * m_dir;
 }
 
-// Hitables
+/// Hitables
 
 // AABB
 
@@ -233,7 +233,7 @@ bool MovingSphere::boundingBox(float t0, float t1, AABB& box) const
 {
 	glm::vec3 radius(m_radius);
 	AABB bi(m_ci - radius, m_ci + radius);
-	AABB bf(m_cf - radius, m_ci + radius);
+	AABB bf(m_cf - radius, m_cf + radius);
 	box = superBox(bi, bf);
 	return true;
 }
