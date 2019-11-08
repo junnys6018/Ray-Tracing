@@ -11,7 +11,7 @@ Lambertian::Lambertian(glm::vec3 albedo)
 bool Lambertian::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const
 {
 	glm::vec3 target = rec.p + rec.normal + randomInUnitSphere();
-	scattered = Ray(rec.p, target - rec.p);
+	scattered = Ray(rec.p, target - rec.p, r_in.time());
 	attenuation = m_albedo;
 	return true;
 }
@@ -31,7 +31,7 @@ Metal::Metal(glm::vec3 fresnel, float roughness)
 bool Metal::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const
 {
 	glm::vec3 reflected = glm::normalize(glm::reflect(r_in.dir(), rec.normal)) + m_roughness * randomInUnitSphere();
-	scattered = Ray(rec.p, reflected);
+	scattered = Ray(rec.p, reflected, r_in.time());
 	attenuation = m_fresnel;
 	return glm::dot(scattered.dir(), rec.normal) > 0;
 }
@@ -79,11 +79,11 @@ bool Dielectric::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& atten
 	static std::uniform_real_distribution<float> u(0.0f, 1.0f);
 	if (u(e) < reflect_prob)
 	{
-		scattered = Ray(rec.p, reflected);
+		scattered = Ray(rec.p, reflected, r_in.time());
 	}
 	else
 	{
-		scattered = Ray(rec.p, refracted);
+		scattered = Ray(rec.p, refracted, r_in.time());
 	}
 
 	return true;
