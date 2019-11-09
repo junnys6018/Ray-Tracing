@@ -3,7 +3,7 @@
 #include <cstring>
 #include <cassert>
 
-Color::Color(char _r, char _g, char _b)
+Color::Color(unsigned char _r, unsigned char _g, unsigned char _b)
 	:r(_r), g(_g), b(_b)
 {
 }
@@ -62,21 +62,6 @@ ImageData& ImageData::operator<<(const glm::vec3& col)
 ImageData::~ImageData()
 {
 	delete[] m_data;
-}
-
-inline int ImageData::getWidth() const
-{
-	return m_width;
-}
-
-inline int ImageData::getHeight() const
-{
-	return m_height;
-}
-
-inline const Color* ImageData::data() const
-{
-	return m_data;
 }
 
 void ImageData::setPixel(int x, int y, Color c)

@@ -233,8 +233,8 @@ bool MovingSphere::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) c
 bool MovingSphere::boundingBox(float t0, float t1, AABB& box) const
 {
 	glm::vec3 radius(m_radius);
-	AABB bi(m_ci - radius, m_ci + radius);
-	AABB bf(m_cf - radius, m_cf + radius);
+	AABB bi(getCenter(t0) - radius, getCenter(t0) + radius);
+	AABB bf(getCenter(t1) - radius, getCenter(t1) + radius);
 	box = superBox(bi, bf);
 	return true;
 }

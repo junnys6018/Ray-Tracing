@@ -4,9 +4,9 @@
 struct Color
 {
 	Color() = default;
-	Color(char, char, char);
+	Color(unsigned char, unsigned char, unsigned char);
 	Color(float, float, float);
-	char r, g, b;
+	unsigned char r, g, b;
 };
 
 class ImageData
@@ -19,9 +19,9 @@ public:
 	ImageData& operator<<(const glm::vec3& col);
 	~ImageData();
 
-	inline int getWidth() const;
-	inline int getHeight() const;
-	inline const Color* data() const;
+	inline int getWidth() const { return m_width; }
+	inline int getHeight() const { return m_height; }
+	inline const Color* data() const { return m_data; }
 
 	void setPixel(int x, int y, Color c);
 
