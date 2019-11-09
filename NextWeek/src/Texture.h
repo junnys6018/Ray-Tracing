@@ -3,6 +3,8 @@
 
 #include "glm.hpp"
 
+#include "Perlin.h"
+
 class Texture
 {
 public:
@@ -30,4 +32,28 @@ public:
 private:
 	std::shared_ptr<Texture> m_t0, m_t1;
 	float m_scale;
+};
+
+class MarbleTexture : public Texture
+{
+public:
+	MarbleTexture(float scale = 1.0f);
+
+	glm::vec3 value(float u, float v, const glm::vec3& p) const override;
+
+private:
+	float m_scale;
+	Perlin m_perlin;
+};
+
+class PerlinTexture : public Texture
+{
+public:
+	PerlinTexture(float scale = 1.0f);
+
+	glm::vec3 value(float u, float v, const glm::vec3& p) const override;
+
+private:
+	float m_scale;
+	Perlin m_perlin;
 };

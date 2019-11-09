@@ -7,7 +7,7 @@
 
 std::vector<std::function<Scene(float)>> getSceneFactories()
 {
-	return { scene1,scene2, scene3 };
+	return { scene1,scene2, scene3,scene4 };
 }
 
 Scene scene1(float aspect)
@@ -90,6 +90,22 @@ Scene scene3(float aspect)
 	glm::vec3 lookat(0.0f);
 	float apature = 0.0f;
 	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(50.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
+
+	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam };
+}
+
+Scene scene4(float aspect)
+{
+	std::shared_ptr<MarbleTexture> marble = std::make_shared<MarbleTexture>(4.0f);
+	std::vector<std::shared_ptr<Hitable>> list;
+
+	list.emplace_back(new Sphere(glm::vec3(0.0f, -1000.0f, 0.0f), 1000.0f, std::make_shared<TexLambertian>(marble)));
+	list.emplace_back(new Sphere(glm::vec3(0.0f, 2.0f, 0.0f), 2.0f, std::make_shared<TexLambertian>(marble)));
+
+	glm::vec3 lookfrom(13.0f, 2.0f, 3.0f);
+	glm::vec3 lookat(0.0f);
+	float apature = 0.0f;
+	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(20.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
 
 	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam };
 }

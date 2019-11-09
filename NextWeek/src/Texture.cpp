@@ -23,3 +23,23 @@ glm::vec3 CheckerTexture::value(float u, float v, const glm::vec3& p) const
 	else
 		return m_t1->value(u, v, p);
 }
+
+MarbleTexture::MarbleTexture(float scale)
+	:m_scale(scale)
+{
+}
+
+glm::vec3 MarbleTexture::value(float u, float v, const glm::vec3& p) const
+{
+	return glm::vec3(0.5f * (1.0f + glm::sin(m_scale * p.z + 10.0f * m_perlin.turb(p))));
+}
+
+PerlinTexture::PerlinTexture(float scale)
+	:m_scale(scale)
+{
+}
+
+glm::vec3 PerlinTexture::value(float u, float v, const glm::vec3& p) const
+{
+	return glm::vec3(0.5f * (1.0f + m_perlin.noise(m_scale * p)));
+}

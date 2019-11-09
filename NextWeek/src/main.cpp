@@ -35,12 +35,12 @@ glm::vec3 color(const Ray& r, Hitable* world, int depth = 0)
 
 int main()
 {
-	int nx = 1080, ny = 720, ns = 10;
+	int nx = 1080, ny = 720, ns = 20;
 	ImageData image(nx, ny);
 
 	auto factory = getSceneFactories();
 	std::cout << "Enter a number from 1 - " << factory.size() << " to select scene: ";
-	int i;
+	size_t i;
 	std::cin >> i;
 	if (i <= 0 || i > factory.size())
 	{
