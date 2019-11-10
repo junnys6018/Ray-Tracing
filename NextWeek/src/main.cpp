@@ -5,6 +5,7 @@
 #include <memory>
 #include <thread>
 #include <string>
+#include <functional>
 
 #include "stb_image.h"
 #include "glm.hpp"
@@ -15,27 +16,26 @@
 #include "Material.h"
 #include "SceneFactory.h"
 
-glm::vec3 color(const Ray& r, Hitable* world, int depth = 0)
+glm::vec3 color(const std::function<glm::vec3(glm::vec3)>& skybox, const Ray& r, Hitable* world, int depth = 0)
 {
 	HitRecord rec;
 	if (world->hit(r, 0.001f, std::numeric_limits<float>::max(), rec))
 	{
 		Ray scattered;
 		glm::vec3 attenuation;
+		glm::vec3 emitted = rec.material->emitted(0, 0, rec.p);
 		if (depth < 50 && rec.material->scatter(r, rec, attenuation, scattered))
 		{
-			return attenuation * color(scattered, world, depth + 1);
+			return emitted + attenuation * color(skybox, scattered, world, depth + 1);
 		}
 		else
-			return glm::vec3(0.0f);
+			return emitted;
 	}
 
-	// Else return sky gradient
-	float t = 0.5f * (glm::normalize(r.dir()).y + 1.0f);
-	return glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
+	return skybox(r.dir());
 }
 
-void renderWorld(int seed, int nx, int ny, int ns, std::shared_ptr<Hitable> world, const Camera& cam, ImageData& image)
+void renderWorld(int seed, int nx, int ny, int ns, const Scene& scene, ImageData& image)
 {
 	std::default_random_engine e(seed);
 	std::uniform_real_distribution<float> uRand(0.0f, 1.0f);
@@ -49,8 +49,8 @@ void renderWorld(int seed, int nx, int ny, int ns, std::shared_ptr<Hitable> worl
 			{
 				float u = float(x + uRand(e)) / nx;
 				float v = float(y + uRand(e)) / ny;
-				Ray r = cam.getRay(u, v);
-				colour += color(r, world.get());
+				Ray r = scene.cam.getRay(u, v);
+				colour += color(scene.skybox, r, scene.world.get());
 			}
 			colour /= ns;
 			colour = glm::pow(colour, glm::vec3(1.0f / 2.2f));
@@ -59,7 +59,7 @@ void renderWorld(int seed, int nx, int ny, int ns, std::shared_ptr<Hitable> worl
 	}
 }
 
-void renderWorldThreaded(int nx, int ny, int ns, int numThreads, std::shared_ptr<Hitable> world, const Camera& cam, ImageData& image)
+void renderWorldThreaded(int nx, int ny, int ns, int numThreads, const Scene& scene, ImageData& image)
 {
 	if (image.getHeight() != ny || image.getWidth() != nx)
 	{
@@ -73,7 +73,7 @@ void renderWorldThreaded(int nx, int ny, int ns, int numThreads, std::shared_ptr
 	std::vector<std::thread> threads;
 	for (int i = 0; i < numThreads; i++)
 	{
-		threads.emplace_back(renderWorld, e(), nx, ny, samplesPerThread, world, cam, std::ref<ImageData>(images[i]));
+		threads.emplace_back(renderWorld, e(), nx, ny, samplesPerThread, scene, std::ref<ImageData>(images[i]));
 	}
 
 	for (auto& th : threads)
@@ -105,7 +105,7 @@ void renderWorldThreaded(int nx, int ny, int ns, int numThreads, std::shared_ptr
 	}
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	int nx = 1080, ny = 720, ns = 25;
 	ImageData image(nx, ny);
@@ -127,7 +127,7 @@ int main()
 	std::chrono::high_resolution_clock c;
 	auto a = c.now();
 	
-	renderWorldThreaded(nx, ny, ns, 5, scene.world, scene.cam, image);
+	renderWorldThreaded(nx, ny, ns, 5, scene, image);
 
 	auto b = c.now();
 	auto duration = b - a;

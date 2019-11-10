@@ -7,8 +7,19 @@
 
 std::vector<std::function<Scene(float)>> getSceneFactories()
 {
-	return { scene1,scene2, scene3,scene4 };
+	return { scene1,scene2, scene3,scene4,scene5 };
 }
+
+static auto daySkybox = [](glm::vec3 dir) -> glm::vec3
+{
+	float t = 0.5f * (glm::normalize(dir).y + 1.0f);
+	return glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
+};
+
+static auto nightSkybox = [](glm::vec3 dir) -> glm::vec3
+{
+	return glm::vec3(0.0f);
+};
 
 Scene scene1(float aspect)
 {
@@ -27,7 +38,7 @@ Scene scene1(float aspect)
 	float apature = 0.0f;
 	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(50.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
 
-	return { std::make_shared<BVHnode>(list, 0.5f, 0.8f),cam };
+	return { std::make_shared<BVHnode>(list, 0.5f, 0.8f), cam, daySkybox };
 }
 
 Scene scene2(float aspect)
@@ -74,7 +85,7 @@ Scene scene2(float aspect)
 	float apature = 0.1f;
 	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(50.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
 
-	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam };
+	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam,daySkybox };
 }
 
 Scene scene3(float aspect)
@@ -91,7 +102,7 @@ Scene scene3(float aspect)
 	float apature = 0.0f;
 	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(50.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
 
-	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam };
+	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam, daySkybox };
 }
 
 Scene scene4(float aspect)
@@ -110,5 +121,28 @@ Scene scene4(float aspect)
 	float apature = 0.0f;
 	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(20.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
 
-	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam };
+	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam, daySkybox };
+}
+
+Scene scene5(float aspect)
+{
+	std::shared_ptr<MarbleTexture> marble = std::make_shared<MarbleTexture>(4.0f);
+	std::shared_ptr<CheckerTexture> checker = std::make_shared<CheckerTexture>(std::make_shared<ConstTexture>(glm::vec3(0.2f, 0.3f, 0.1f)),
+		std::make_shared<ConstTexture>(glm::vec3(0.9f, 0.9f, 0.9f)));
+	std::shared_ptr<ConstTexture> light = std::make_shared<ConstTexture>(glm::vec3(2.0f, 2.0f, 2.0f));
+
+	std::vector<std::shared_ptr<Hitable>> list;
+
+	list.emplace_back(new Sphere(glm::vec3(0.0f, -1000.0f, 0.0f), 1000.0f, std::make_shared<TexLambertian>(checker)));
+	list.emplace_back(new Sphere(glm::vec3(0.0f, 2.0f, 0.0f), 2.0f, std::make_shared<TexLambertian>(marble)));
+	list.emplace_back(new Sphere(glm::vec3(3.0f, 1.0, 2.0f), 1.0f, std::make_shared<Metal>(glm::vec3(0.7f, 0.7f, 0.7f), 0.4f)));
+	list.emplace_back(new Sphere(glm::vec3(3.0f, 1.0, -2.0f), 1.0f, std::make_shared<Metal>(glm::vec3(0.7f, 0.5f, 0.5f), 0.05f)));
+	list.emplace_back(new Sphere(glm::vec3(4.0, 3.0f, 0.0f), 0.4f, std::make_shared<DiffuseLight>(light)));
+
+	glm::vec3 lookfrom(13.0f, 2.0f, 0.0f);
+	glm::vec3 lookat(0.0f);
+	float apature = 0.0f;
+	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(40.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
+
+	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam, nightSkybox };
 }

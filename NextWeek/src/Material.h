@@ -7,6 +7,7 @@ class Material
 {
 public:
 	virtual bool scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const = 0;
+	virtual glm::vec3 emitted(float u, float v, const glm::vec3& p) const { return glm::vec3(0.0f); }
 };
 
 class Lambertian : public Material
@@ -63,6 +64,17 @@ public:
 
 private:
 	float m_refIndex;
+};
+
+class DiffuseLight : public Material
+{
+public:
+	DiffuseLight(std::shared_ptr<Texture> emit);
+	bool scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const override;
+	virtual glm::vec3 emitted(float u, float v, const glm::vec3& p) const override;
+
+private:
+	std::shared_ptr<Texture> m_emit;
 };
 
 float schlick(float cos, float refIndex);

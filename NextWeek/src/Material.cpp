@@ -111,3 +111,18 @@ float schlick(float cos, float refIndex)
 	r0 = r0 * r0;
 	return r0 + (1 - r0) * glm::pow(1 - cos, 5);
 }
+
+DiffuseLight::DiffuseLight(std::shared_ptr<Texture> emit)
+	:m_emit(emit)
+{
+}
+
+bool DiffuseLight::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const
+{
+	return false;
+}
+
+glm::vec3 DiffuseLight::emitted(float u, float v, const glm::vec3& p) const
+{
+	return m_emit->value(u, v, p);
+}
