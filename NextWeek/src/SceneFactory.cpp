@@ -13,7 +13,7 @@ std::vector<std::function<Scene(float)>> getSceneFactories()
 static auto daySkybox = [](glm::vec3 dir) -> glm::vec3
 {
 	float t = 0.5f * (glm::normalize(dir).y + 1.0f);
-	return glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
+	return glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.70f, 1.2f, 2.0f), t);
 };
 
 static auto nightSkybox = [](glm::vec3 dir) -> glm::vec3
@@ -129,7 +129,7 @@ Scene scene5(float aspect)
 	std::shared_ptr<MarbleTexture> marble = std::make_shared<MarbleTexture>(4.0f);
 	std::shared_ptr<CheckerTexture> checker = std::make_shared<CheckerTexture>(std::make_shared<ConstTexture>(glm::vec3(0.2f, 0.3f, 0.1f)),
 		std::make_shared<ConstTexture>(glm::vec3(0.9f, 0.9f, 0.9f)));
-	std::shared_ptr<ConstTexture> light = std::make_shared<ConstTexture>(glm::vec3(2.0f, 2.0f, 2.0f));
+	std::shared_ptr<ConstTexture> light = std::make_shared<ConstTexture>(glm::vec3(4.0f));
 
 	std::vector<std::shared_ptr<Hitable>> list;
 

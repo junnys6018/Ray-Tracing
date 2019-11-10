@@ -53,7 +53,8 @@ void renderWorld(int seed, int nx, int ny, int ns, const Scene& scene, ImageData
 				colour += color(scene.skybox, r, scene.world.get());
 			}
 			colour /= ns;
-			colour = glm::pow(colour, glm::vec3(1.0f / 2.2f));
+			colour = glm::vec3(1.0f) - glm::exp(-colour); // Tonemapping
+			colour = glm::pow(colour, glm::vec3(1.0f / 2.2f)); // Gamma correct
 			image << colour;
 		}
 	}
@@ -107,7 +108,7 @@ void renderWorldThreaded(int nx, int ny, int ns, int numThreads, const Scene& sc
 
 int main(int argc, char** argv)
 {
-	int nx = 1080, ny = 720, ns = 25;
+	int nx = 1080, ny = 720, ns = 100;
 	ImageData image(nx, ny);
 
 	auto factory = getSceneFactories();
