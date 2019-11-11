@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include "Texture.h"
+
 class Ray
 {
 public:
@@ -47,12 +49,8 @@ struct HitRecord
 class Hitable
 {
 public:
-	Hitable(std::shared_ptr<Material> mat);
 	virtual bool hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const = 0;
 	virtual bool boundingBox(float t0, float t1, AABB& box) const = 0;
-
-protected:
-	std::shared_ptr<Material> m_material;
 };
 
 class BVHnode : public Hitable
@@ -86,6 +84,7 @@ public:
 private:
 	glm::vec3 m_center;
 	float m_radius;
+	std::shared_ptr<Material> m_material;
 };
 
 class MovingSphere : public Hitable
@@ -109,6 +108,7 @@ private:
 	glm::vec3 m_ci, m_cf;
 	float m_ti, m_tf;
 	float m_radius;
+	std::shared_ptr<Material> m_material;
 };
 
 class HitableList : public Hitable
@@ -120,6 +120,19 @@ public:
 
 private:
 	std::vector<std::shared_ptr<Hitable>> m_list;
+};
+
+class ConstantMedium : public Hitable
+{
+public:
+	ConstantMedium(std::shared_ptr<Hitable> boundary, float density, std::shared_ptr<Texture> color);
+	bool hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const override;
+	bool boundingBox(float t0, float t1, AABB& box) const override;
+
+private:
+	std::shared_ptr<Hitable> m_boundary;
+	float m_density;
+	std::shared_ptr<Material> m_phaseFunction;
 };
 
 // Helpers

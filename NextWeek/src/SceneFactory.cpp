@@ -7,13 +7,13 @@
 
 std::vector<std::function<Scene(float)>> getSceneFactories()
 {
-	return { scene1,scene2, scene3,scene4,scene5 };
+	return { scene1,scene2, scene3,scene4,scene5,scene6 };
 }
 
 static auto daySkybox = [](glm::vec3 dir) -> glm::vec3
 {
 	float t = 0.5f * (glm::normalize(dir).y + 1.0f);
-	return glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.70f, 1.2f, 2.0f), t);
+	return glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
 };
 
 static auto nightSkybox = [](glm::vec3 dir) -> glm::vec3
@@ -24,14 +24,11 @@ static auto nightSkybox = [](glm::vec3 dir) -> glm::vec3
 Scene scene1(float aspect)
 {
 	std::vector<std::shared_ptr<Hitable>> list;
-	list.push_back(std::shared_ptr<Hitable>(new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f,
-		std::shared_ptr<Material>(new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f))))));
-	list.push_back(std::shared_ptr<Hitable>(new MovingSphere(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, -1.0f),
-		0.0f, 1.5f, 0.5f, std::shared_ptr<Material>(new Lambertian(glm::vec3(0.8f, 0.3f, 0.3f))))));
-	list.push_back(std::shared_ptr<Hitable>(new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5f,
-		std::shared_ptr<Material>(new Metal(glm::vec3(0.8f, 0.8f, 0.8f), 0.1f)))));
-	list.push_back(std::shared_ptr<Hitable>(new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5f,
-		std::shared_ptr<Material>(new Dielectric(1.5f)))));
+	list.emplace_back(new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, std::make_shared<Lambertian>(glm::vec3(0.8f, 0.8f, 0.0f))));
+	list.emplace_back(new MovingSphere(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, -1.0f),
+		0.0f, 1.5f, 0.5f, std::make_shared<Lambertian>(glm::vec3(0.8f, 0.3f, 0.3f))));
+	list.emplace_back(new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5f, std::make_shared<Metal>(glm::vec3(0.8f, 0.8f, 0.8f), 0.1f)));
+	list.emplace_back(new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5f, std::make_shared<Dielectric>(1.5f)));
 
 	glm::vec3 lookfrom(0.0f, 1.0f, 3.0f);
 	glm::vec3 lookat(0.0f, 0.0f, -1.0f);
@@ -145,4 +142,39 @@ Scene scene5(float aspect)
 	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(40.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
 
 	return { std::make_shared<BVHnode>(list, 0.0f, std::numeric_limits<float>::max()), cam, nightSkybox };
+}
+
+Scene scene6(float aspect)
+{
+	std::vector<std::shared_ptr<Hitable>> list;
+	list.emplace_back(new Sphere(glm::vec3(0.0f, -1000.0f, -1.0f), 1000.0f, std::make_shared<Lambertian>(glm::vec3(0.8f, 0.8f, 0.0f))));
+	list.emplace_back(new Sphere(glm::vec3(0.0f, 0.0f, -540.0f), 500.0f, std::make_shared<TexLambertian>(std::make_shared<MarbleTexture>(2.0f))));
+	list.emplace_back(new Sphere(glm::vec3(-540.0f, 0.0f, 0.0f), 500.0f, std::make_shared<Metal>(glm::vec3(0.8f, 0.8f, 0.8f), 0.01f)));
+	list.emplace_back(new MovingSphere(glm::vec3(0.0f, 0.5f, -1.0f), glm::vec3(0.0f, 1.5f, -1.0f),
+		0.0f, 1.5f, 0.5f, std::make_shared<Lambertian>(glm::vec3(0.8f, 0.3f, 0.3f))));
+	list.emplace_back(new Sphere(glm::vec3(1.0f, 0.5f, -1.0f), 0.5f, std::make_shared<Metal>(glm::vec3(0.8f, 0.8f, 0.8f), 0.01f)));
+	list.emplace_back(new Sphere(glm::vec3(-1.5f, 0.5f, -1.5f), 0.5f, std::make_shared<Dielectric>(1.5f)));
+
+	glm::vec3 lowerCorner = glm::vec3(-2.4f, 0.2f, -1.5f);
+	glm::vec3 upperCorner = lowerCorner + glm::vec3(2.0f);
+	float radius = (upperCorner.x - lowerCorner.x) / 10.0f;
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			for (int k = 0; k < 5; k++)
+			{
+				auto a = std::shared_ptr<Hitable>(new Sphere(lowerCorner + glm::vec3(i, j, k) * (upperCorner - lowerCorner) / glm::vec3(5.0f)
+					, radius, nullptr));
+				list.emplace_back(new ConstantMedium(a, 10.0f, std::make_shared<ConstTexture>(glm::vec3(1.0f))));
+			}
+		}
+	}
+
+	glm::vec3 lookfrom(3.0f, 1.5f, 3.0f);
+	glm::vec3 lookat(0.0f, 0.5f, -1.0f);
+	float apature = 0.0f;
+	Camera cam(lookfrom, lookat, glm::vec3(0, 1, 0), glm::radians(50.0f), aspect, apature, 10.0f, 0.5f, 0.8f);
+
+	return { std::make_shared<BVHnode>(list, 0.5f, 0.8f), cam, daySkybox };
 }

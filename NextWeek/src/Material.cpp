@@ -1,6 +1,7 @@
 #include "Material.h"
 
 #include <random>
+#include "Random.h"
 
 Lambertian::Lambertian(glm::vec3 albedo)
 	:m_albedo(albedo)
@@ -125,4 +126,16 @@ bool DiffuseLight::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& att
 glm::vec3 DiffuseLight::emitted(float u, float v, const glm::vec3& p) const
 {
 	return m_emit->value(u, v, p);
+}
+
+Isotropic::Isotropic(std::shared_ptr<Texture> color)
+	:m_color(color)
+{
+}
+
+bool Isotropic::scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const
+{
+	scattered = Ray(rec.p, randomInUnitSphere(), r_in.time());
+	attenuation = m_color->value(0.0f, 0.0f, rec.p);
+	return true;
 }

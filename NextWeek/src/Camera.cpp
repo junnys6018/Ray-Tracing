@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Random.h"
 #include <random>
 
 Camera::Camera(glm::vec3 lookFrom, glm::vec3 lookAt, glm::vec3 up, float vfov,
@@ -25,16 +26,4 @@ Ray Camera::getRay(float u, float v) const
 	glm::vec3 rd = m_lensRadius * randomInUnitDisk();
 	glm::vec3 offset = m_u * rd.x + m_v * rd.y;
 	return Ray(m_origin + offset, m_lowerLeft + u * m_horizontal + v * m_vertical - m_origin - offset, rand(e));
-}
-
-glm::vec3 Camera::randomInUnitDisk() const
-{
-	static std::default_random_engine e;
-	static std::uniform_real_distribution<float> u(-1.0f, 1.0f);
-	glm::vec3 p;
-	do
-	{
-		p = glm::vec3(u(e), u(e), 0.0f);
-	} while (glm::dot(p, p) >= 1.0f);
-	return p;
 }

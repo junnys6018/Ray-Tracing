@@ -16,6 +16,4 @@ private:
 	glm::vec3 m_u, m_v, m_w;
 	float m_lensRadius;
 	float m_ti, m_tf; // Denotes range when shutter is open
-private:
-	glm::vec3 randomInUnitDisk() const;
 };

@@ -98,7 +98,7 @@ void permute(int* p, int n)
 int* perlinGeneratePerm()
 {
 	int* p = new int[256];
-	for (int i = 0; i < 250; i++)
+	for (int i = 0; i < 256; i++)
 	{
 		p[i] = i;
 	}

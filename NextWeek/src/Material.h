@@ -77,4 +77,14 @@ private:
 	std::shared_ptr<Texture> m_emit;
 };
 
+class Isotropic : public Material
+{
+public:
+	Isotropic(std::shared_ptr<Texture> color);
+	bool scatter(const Ray& r_in, const HitRecord& rec, glm::vec3& attenuation, Ray& scattered) const override;
+
+private:
+	std::shared_ptr<Texture> m_color;
+};
+
 float schlick(float cos, float refIndex);

@@ -1,8 +1,11 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include <limits>
 
 #include "Geometry.h"
+#include "Material.h"
+#include "Random.h"
 
 // Ray
 
@@ -44,15 +47,9 @@ bool AABB::hit(const Ray& r, float tmin, float tmax) const
 	return true;
 }
 
-Hitable::Hitable(std::shared_ptr<Material> mat)
-	:m_material(mat)
-{
-}
-
 // BVH
 
 BVHnode::BVHnode(std::vector<std::shared_ptr<Hitable>> list, float t0, float t1)
-	:Hitable(nullptr)
 {
 	static std::default_random_engine e;
 	static std::uniform_int_distribution<int> rand(0, 2);
@@ -139,7 +136,7 @@ bool BVHnode::boundingBox(float t0, float t1, AABB& box) const
 // Sphere
 
 Sphere::Sphere(glm::vec3 center, float radius, std::shared_ptr<Material> mat)
-	:Hitable(mat), m_center(center), m_radius(radius)
+	:m_center(center), m_radius(radius), m_material(mat)
 {
 }
 
@@ -194,7 +191,7 @@ bool Sphere::boundingBox(float t0, float t1, AABB& box) const
 // Moving Sphere
 
 MovingSphere::MovingSphere(glm::vec3 ci, glm::vec3 cf, float ti, float tf, float radius, std::shared_ptr<Material> mat)
-	:Hitable(mat), m_ci(ci), m_cf(cf), m_ti(ti), m_tf(tf), m_radius(radius)
+	:m_ci(ci), m_cf(cf), m_ti(ti), m_tf(tf), m_radius(radius), m_material(mat)
 {
 }
 
@@ -242,7 +239,7 @@ bool MovingSphere::boundingBox(float t0, float t1, AABB& box) const
 // List
 
 HitableList::HitableList(std::vector<std::shared_ptr<Hitable>> list)
-	:Hitable(nullptr), m_list(list)
+	:m_list(list)
 {
 }
 
@@ -285,21 +282,6 @@ bool HitableList::boundingBox(float t0, float t1, AABB& box) const
 	return true;
 }
 
-// Sampling
-
-glm::vec3 randomInUnitSphere()
-{
-	static std::default_random_engine e;
-	static std::uniform_real_distribution<float> u(-1.0f, 1.0f);
-
-	glm::vec3 p;
-	do
-	{
-		p = glm::vec3(u(e), u(e), u(e));
-	} while (glm::dot(p, p) >= 1.0f);
-	return p;
-}
-
 AABB superBox(const AABB& b1, const AABB& b2)
 {
 	glm::vec3 lower(fmin(b1.min().x, b2.min().x),
@@ -311,4 +293,57 @@ AABB superBox(const AABB& b1, const AABB& b2)
 					fmax(b1.max().z, b2.max().z));
 
 	return AABB(lower, upper);
+}
+
+ConstantMedium::ConstantMedium(std::shared_ptr<Hitable> boundary, float density, std::shared_ptr<Texture> color)
+	:m_boundary(boundary), m_density(density), m_phaseFunction(std::make_shared<Isotropic>(color))
+{
+}
+
+bool ConstantMedium::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
+{
+	// Print occasional samples when debugging. To enable, set enableDebug true.
+	const bool enableDebug = false;
+	bool debugging = enableDebug && myRand() < 0.00001f;
+
+	HitRecord rec1, rec2;
+	if (m_boundary->hit(r, std::numeric_limits<float>::min(), std::numeric_limits<float>::max(), rec1))
+	{
+		if (m_boundary->hit(r, rec1.t + std::numeric_limits<float>::epsilon(), std::numeric_limits<float>::max(), rec2))
+		{
+			if (rec1.t < t_min)
+				rec1.t = t_min;
+			if (rec2.t > t_max)
+				rec2.t = t_max;
+			if (rec1.t > rec2.t)
+				return false;
+			if (rec1.t < 0.0f)
+				rec1.t = 0.0f;
+
+			float distanceInBoundary = (rec2.t - rec1.t) * r.dir().length();
+			float hitDistance = -(1.0f / m_density) * glm::log(myRand()); // see: http://psgraphics.blogspot.com/2013/11/scattering-in-constant-medium.html
+			if (hitDistance < distanceInBoundary)
+			{
+				rec.t = rec1.t + hitDistance / r.dir().length();
+				rec.p = r.parameterize(rec.t);
+				rec.normal = glm::vec3(1.0f, 0.0f, 0.0f); // normals not used
+				rec.material = m_phaseFunction;
+
+				if (debugging) {
+					std::cerr << "hit_distance = " << hitDistance << '\n'
+						<< "rec.t = " << rec.t << '\n'
+						<< "rec.p = (" << rec.p.x << ", " << rec.p.y << ", " << rec.p.z << ")\n";
+				}
+
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool ConstantMedium::boundingBox(float t0, float t1, AABB& box) const
+{
+	return m_boundary->boundingBox(t0, t1, box);
 }

@@ -20,3 +20,4 @@ Scene scene2(float aspect);
 Scene scene3(float aspect);
 Scene scene4(float aspect);
 Scene scene5(float aspect);
+Scene scene6(float aspect);
