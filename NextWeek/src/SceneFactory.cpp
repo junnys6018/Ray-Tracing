@@ -21,6 +21,16 @@ static auto nightSkybox = [](glm::vec3 dir) -> glm::vec3
 	return glm::vec3(0.0f);
 };
 
+extern const char* scene_desc[NUM_SCENES] = 
+{
+	"Moving Sphere",
+	"Hundred Spheres",
+	"Checkered Texture",
+	"Marble Sphere with Glass Ball",
+	"Lit up Scene",
+	"Constant Medium"
+};
+
 Scene scene1(float aspect)
 {
 	std::vector<std::shared_ptr<Hitable>> list;

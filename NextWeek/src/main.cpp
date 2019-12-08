@@ -102,11 +102,16 @@ void renderWorldThreaded(int nx, int ny, int ns, int numThreads, const Scene& sc
 
 int main(int argc, char** argv)
 {
-	int nx = 1080, ny = 720, ns = 1000;
+	int nx = 1080, ny = 720, ns = 20;
 	ImageData image(nx, ny);
 
 	auto factory = getSceneFactories();
-	std::cout << "Enter a number from 1 - " << factory.size() << " to select scene: ";
+	std::cout << "Enter a number from 1 - " << factory.size() << " to select scene.\n";
+	for (int i = 0; i < NUM_SCENES; i++)
+	{
+		std::cout << "\tScene " << i + 1 << " - " << scene_desc[i] << "\n";
+	}
+
 	size_t i;
 	std::cin >> i;
 	if (i <= 0 || i > factory.size())
